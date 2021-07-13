@@ -1,6 +1,8 @@
 import express from "express";
-import User from "../models/User";
 import bcrypt from "bcrypt";
+import User from "../models/User";
+import jwt from "jsonwebtoken";
+import config from "../config";
 
 const auth = (app: express.Application) => {
   const router = express.Router();
@@ -32,7 +34,7 @@ const auth = (app: express.Application) => {
         id: newUser._id,
         username: newUser.username,
         email: newUser.email,
-        coins: newUser.coins
+        coins: newUser.coins,
       });
     } catch (error) {
       next(error);
@@ -48,16 +50,23 @@ const auth = (app: express.Application) => {
         throw new Error("email does not exist");
       }
 
-      const comparePassword = await bcrypt.compare(password, user.password)
+      const comparePassword = await bcrypt.compare(password, user.password);
 
       if (!comparePassword) {
-        throw new Error('Incorrect password');
+        throw new Error("Incorrect password");
       }
 
-      if(comparePassword){
-        res.status(200).json(user)
-      }
+      if (comparePassword) {
+        const token = jwt.sign(
+          {
+            id: user.id,
+          },
+          config.JWT_SECRET,
+          { expiresIn: 60 *60}
+        );
 
+        res.status(200).json({ user, token });
+      }
     } catch (error) {
       next(error);
     }

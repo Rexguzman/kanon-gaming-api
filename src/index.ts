@@ -4,6 +4,7 @@ const cors = require("cors");
 const Ddos = require("ddos");
 
 import countries from "./routes/countries";
+import game from './routes/game'
 import auth from "./routes/auth";
 import config from "./config/index";
 import dbConnect from "./lib/mongoose";
@@ -16,7 +17,7 @@ app.use(helmet());
 app.use(express.json());
 app.use(
   cors({
-    //credentials: true,
+    credentials: true,
     origin: "*",
     method: "GET,HEAD,PUT,PATCH,POST,DELETE",
   })
@@ -28,6 +29,7 @@ dbConnect(config.DATABASE_URL);
 
 //Routes
 countries(app);
+game(app);
 auth(app);
 
 app.listen(config.PORT, () => {
